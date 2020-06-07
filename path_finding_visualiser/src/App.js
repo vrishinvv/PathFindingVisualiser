@@ -3,10 +3,13 @@ import "./App.css";
 import Node from "./Components/Node/Node";
 import { dijkstras, getNodesInShortestPathOrder } from "./Algorithm/Dijkstra";
 import { getNodesInOrder } from "./MazeBuilder/RecursiveDivision";
+import NavBar from "./Components/NavBar/NavBar";
 
 import { solve } from "./MazeBuilder/RecursiveBacktracker";
 
 import * as constants from "./Constants";
+
+import "bootstrap/dist/css/bootstrap.min.css";
 
 let START_NODE_ROW = -1;
 let START_NODE_COL = -1;
@@ -192,6 +195,7 @@ export default class App extends React.Component {
   };
 
   visualizeMaze1 = () => {
+    console.log("hey there");
     this.clearBoard();
     const grid = JSON.parse(JSON.stringify(this.state.grid));
     const visitedNodesInOrder = getNodesInOrder(grid, 0, N - 1, 0, M - 1);
@@ -212,12 +216,15 @@ export default class App extends React.Component {
     const visitedNodesInOrder = solve(grid, 0, N - 1, 0, M - 1);
     for (let i = 0; i < N; i++) {
       for (let j = 0; j < M; j++) {
-        const node = this.state.grid[i][j];
-        node.isWall = true;
-        document.getElementById(`node-${i}-${j}`).className =
-          "node node_wall_f";
+        setTimeout(() => {
+          const node = this.state.grid[i][j];
+          node.isWall = true;
+          document.getElementById(`node-${i}-${j}`).className =
+            "node node_wall_f";
+        }, 10);
       }
     }
+
     for (let i = 0; i < visitedNodesInOrder.length; i++) {
       setTimeout(() => {
         const node = visitedNodesInOrder[i];
@@ -225,7 +232,7 @@ export default class App extends React.Component {
         a_node.isWall = false;
         document.getElementById(`node-${node.row}-${node.col}`).className =
           "node node_wall_del";
-      }, 10 * i);
+      }, 20 * i);
     }
   };
 
@@ -259,58 +266,52 @@ export default class App extends React.Component {
   render() {
     const { grid, mouseIsPressed, buttonPressed } = this.state;
     return (
-      <div className="grid">
-        <button
-          onClick={() => this.visualizeDijkstra(0, END_NODE_ROW, END_NODE_COL)}
-        >
-          Visualise Dijkstra Algorithm
-        </button>
-        <button onClick={() => this.clearBoard()}>Clear Board</button>
-        <button onClick={() => this.handleChoice(constants.START)}>
-          Add Start
-        </button>
-        <button onClick={() => this.handleChoice(constants.END)}>
-          Add End
-        </button>
-        <button onClick={() => this.handleChoice(constants.ADD_WALL)}>
-          Add Walls
-        </button>
-        <button onClick={() => this.handleChoice(constants.DEL_WALL)}>
-          Del Walls
-        </button>
-        <button onClick={() => this.visualizeMaze1(constants.BUILD_MAZE)}>
-          Build Maze1
-        </button>
-        <button onClick={() => this.visualizeMaze2(constants.BUILD_MAZE)}>
-          Build Maze2
-        </button>
+      <div>
+        <NavBar
+          visualizeMaze1={this.visualizeMaze1}
+          visualizeMaze2={this.visualizeMaze2}
+          clearBoard={this.clearBoard}
+          addStart={this.handleChoice}
+          addEnd={this.handleChoice}
+          addWall={this.handleChoice}
+          delWall={this.handleChoice}
+          visualizeDijkstras={this.visualizeDijkstra}
+          end_node_row={END_NODE_ROW}
+          end_node_col={END_NODE_COL}
+        />
 
-        {grid.map((row, rowIdx) => {
-          return (
-            <div key={rowIdx}>
-              {row.map((node, nodeIdx) => {
-                const { row, col, isEnd, isStart, isWall, isVisited } = node;
-                return (
-                  <Node
-                    key={nodeIdx}
-                    onMouseDown={(row, col) => this.handleMouseDown(row, col)}
-                    onMouseEnter={(row, col) => this.handleMouseEnter(row, col)}
-                    onMouseUp={() => this.handleMouseUp()}
-                    onMouseClick={(row, col) => this.handleMouseClick(row, col)}
-                    row={row}
-                    col={col}
-                    isWall={isWall}
-                    isStart={isStart}
-                    isEnd={isEnd}
-                    isVisited={isVisited}
-                    mouseIsPressed={mouseIsPressed}
-                    buttonPressed={buttonPressed}
-                  ></Node>
-                );
-              })}
-            </div>
-          );
-        })}
+        <div className="grid">
+          {grid.map((row, rowIdx) => {
+            return (
+              <div key={rowIdx}>
+                {row.map((node, nodeIdx) => {
+                  const { row, col, isEnd, isStart, isWall, isVisited } = node;
+                  return (
+                    <Node
+                      key={nodeIdx}
+                      onMouseDown={(row, col) => this.handleMouseDown(row, col)}
+                      onMouseEnter={(row, col) =>
+                        this.handleMouseEnter(row, col)
+                      }
+                      onMouseUp={() => this.handleMouseUp()}
+                      onMouseClick={(row, col) =>
+                        this.handleMouseClick(row, col)
+                      }
+                      row={row}
+                      col={col}
+                      isWall={isWall}
+                      isStart={isStart}
+                      isEnd={isEnd}
+                      isVisited={isVisited}
+                      mouseIsPressed={mouseIsPressed}
+                      buttonPressed={buttonPressed}
+                    ></Node>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
       </div>
     );
   }
