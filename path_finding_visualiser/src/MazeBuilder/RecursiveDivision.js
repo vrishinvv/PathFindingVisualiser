@@ -1,97 +1,61 @@
 var visitedNodesInOrder = [];
 function recursiveDivision(grid, start_row, end_row, start_col, end_col) {
   //var cut = Math.floor(Math.random() * 2);
-  var cut = end_row - start_row < end_col - start_col ? 1 : 0;
-  let diff_rows = end_row - start_row - 1;
-  let diff_cols = end_col - start_col - 1;
+  var cut = end_row - start_row <= end_col - start_col ? 1 : 0;
 
-  console.log(start_row, end_row, start_col, end_col);
-  if (diff_rows <= 1 && diff_cols <= 1) return;
-  if (diff_rows <= 1) {
-    cut = 1;
-  }
-  if (diff_cols <= 1) {
-    cut = 0;
-  }
+  if (end_row - start_row < 2 && end_col - start_col < 2) return;
 
   // it is a horizontal cut
   if (cut === 0) {
-    horizontal(
-      grid,
-      start_row,
-      end_row,
-      start_col,
-      end_col,
-      cut,
-      diff_rows,
-      diff_cols
-    );
+    horizontal(grid, start_row, end_row, start_col, end_col, cut);
   } // it is a vertical cut
   else {
-    vertical(
-      grid,
-      start_row,
-      end_row,
-      start_col,
-      end_col,
-      cut,
-      diff_rows,
-      diff_cols
-    );
+    vertical(grid, start_row, end_row, start_col, end_col, cut);
   }
 }
 
-function horizontal(
-  grid,
-  start_row,
-  end_row,
-  start_col,
-  end_col,
-  cut,
-  diff_rows,
-  diff_cols
-) {
-  let cnt = 0;
-  do {
-    var rowId = start_row + Math.floor(Math.random() * diff_rows + 1);
-    cnt++;
-    if (cnt > 10) return;
-  } while (
-    !(
-      grid[rowId][start_col - 1].isWall === true &&
-      grid[rowId][end_col + 1].isWall === true
-    )
-  );
-  const freePos = start_col + Math.floor(Math.random() * diff_cols + 1);
+function horizontal(grid, start_row, end_row, start_col, end_col, cut) {
+  var seeMe = [];
+  for (let i = start_row + 1; i <= end_row - 1; i += 2) {
+    seeMe.push(i);
+  }
+  shuffle(seeMe);
+  if (seeMe.length === 0) return;
+  var rowId = seeMe[0];
+  seeMe = [];
+  for (let i = start_col; i <= end_col; i += 2) {
+    seeMe.push(i);
+  }
+  shuffle(seeMe);
+  if (seeMe.length === 0) return;
+  var freePos = seeMe[0];
   add_to_ans(grid, start_row, end_row, start_col, end_col, cut, rowId, freePos);
   recursiveDivision(grid, start_row, rowId - 1, start_col, end_col);
   recursiveDivision(grid, rowId + 1, end_row, start_col, end_col);
 }
-function vertical(
-  grid,
-  start_row,
-  end_row,
-  start_col,
-  end_col,
-  cut,
-  diff_rows,
-  diff_cols
-) {
-  let cnt = 0;
-  do {
-    var colId = start_col + Math.floor(Math.random() * diff_cols + 1);
-    cnt++;
-    if (cnt > 10) return;
-  } while (
-    !(
-      grid[start_row - 1][colId].isWall === true &&
-      grid[end_row + 1][colId].isWall === true
-    )
-  );
-  const freePos = start_row + Math.floor(Math.random() * diff_rows + 1);
+
+function vertical(grid, start_row, end_row, start_col, end_col, cut) {
+  var seeMe = [];
+  for (let i = start_col + 1; i <= end_col - 1; i += 2) {
+    seeMe.push(i);
+  }
+  shuffle(seeMe);
+  if (seeMe.length === 0) return;
+  var colId = seeMe[0];
+  seeMe = [];
+  for (let i = start_row; i <= end_row; i += 2) {
+    seeMe.push(i);
+  }
+  shuffle(seeMe);
+  if (seeMe.length === 0) return;
+  var freePos = seeMe[0];
   add_to_ans(grid, start_row, end_row, start_col, end_col, cut, colId, freePos);
   recursiveDivision(grid, start_row, end_row, start_col, colId - 1);
   recursiveDivision(grid, start_row, end_row, colId + 1, end_col);
+}
+
+function shuffle(array) {
+  array.sort(() => Math.random() - 0.5);
 }
 
 function add_to_ans(
