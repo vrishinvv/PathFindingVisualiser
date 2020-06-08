@@ -18,7 +18,7 @@ export default class Node extends React.Component {
       addEnd,
       addWall,
       delWall,
-      visualizeDijkstras,
+      visualizeAlgorithm,
       end_node_row,
       end_node_col,
     } = this.props;
@@ -80,10 +80,81 @@ export default class Node extends React.Component {
                 <NavDropdown.Item
                   href="#action/3.7"
                   onClick={() =>
-                    visualizeDijkstras(0, end_node_row, end_node_col)
+                    visualizeAlgorithm(
+                      0,
+                      end_node_row,
+                      end_node_col,
+                      constants.DIJK
+                    )
                   }
                 >
-                  Dijkstra's Algorithm
+                  Dijkstra's
+                </NavDropdown.Item>
+                <NavDropdown.Item
+                  href="#action/3.8"
+                  onClick={() =>
+                    visualizeAlgorithm(
+                      0,
+                      end_node_row,
+                      end_node_col,
+                      constants.DFS_NORM,
+                      1
+                    )
+                  }
+                >
+                  Depth First Search - Normal
+                </NavDropdown.Item>
+                <NavDropdown.Item
+                  href="#action/3.9"
+                  onClick={() =>
+                    visualizeAlgorithm(
+                      0,
+                      end_node_row,
+                      end_node_col,
+                      constants.DFS_RAND
+                    )
+                  }
+                >
+                  Depth First Search - Randomised
+                </NavDropdown.Item>
+                <NavDropdown.Item
+                  href="#action/4.0"
+                  onClick={() =>
+                    visualizeAlgorithm(
+                      0,
+                      end_node_row,
+                      end_node_col,
+                      constants.BFS
+                    )
+                  }
+                >
+                  Breadth First Search - Normal
+                </NavDropdown.Item>
+                <NavDropdown.Item
+                  href="#action/4.1"
+                  onClick={() =>
+                    visualizeAlgorithm(
+                      0,
+                      end_node_row,
+                      end_node_col,
+                      constants.MBFS
+                    )
+                  }
+                >
+                  Breadth First Search - Multi Source
+                </NavDropdown.Item>
+                <NavDropdown.Item
+                  href="#action/4.2"
+                  onClick={() =>
+                    visualizeAlgorithm(
+                      0,
+                      end_node_row,
+                      end_node_col,
+                      constants.ASTAR
+                    )
+                  }
+                >
+                  A* Algorithm
                 </NavDropdown.Item>
               </NavDropdown>
             </Nav>

@@ -105,3 +105,10 @@ export function getNodesInOrder(grid, start_row, end_row, start_col, end_col) {
   );
   return visitedNodesInOrder;
 }
+
+/*
+Make the dimensions odd,
+choose even places to draw walls, 
+choose odd places to make openings
+apply recursive division to solve the problem
+*/

@@ -2,6 +2,25 @@ import React from "react";
 import "./App.css";
 import Node from "./Components/Node/Node";
 import { dijkstras, getNodesInShortestPathOrder } from "./Algorithm/Dijkstra";
+import {
+  solve_dfs,
+  getNodesInShortestPathOrderDFS,
+} from "./Algorithm/DepthFirstSearch";
+import {
+  solve_bfs,
+  getNodesInShortestPathOrderBFS,
+} from "./Algorithm/BreadthFirstSearch";
+
+import {
+  solve_mbfs,
+  getNodesInShortestPathOrderMBFS,
+} from "./Algorithm/MultiSourceBFS";
+
+import {
+  solve_astar,
+  getNodesInShortestPathOrderASTAR,
+} from "./Algorithm/ASearch";
+
 import { getNodesInOrder } from "./MazeBuilder/RecursiveDivision";
 import NavBar from "./Components/NavBar/NavBar";
 
@@ -19,6 +38,7 @@ const N = 31;
 const M = 75;
 let cur_row = -1;
 let cur_col = -1;
+let algo;
 
 export default class App extends React.Component {
   constructor(props) {
@@ -46,7 +66,7 @@ export default class App extends React.Component {
       }
       case constants.DONE: {
         if (this.state.grid[row][col].isWall) return;
-        this.visualizeDijkstra(1, row, col);
+        this.visualizeAlgorithm(1, row, col, algo);
         break;
       }
       default:
@@ -72,7 +92,7 @@ export default class App extends React.Component {
       }
       case constants.DONE: {
         if (this.state.grid[row][col].isWall) return;
-        this.visualizeDijkstra(1, row, col);
+        this.visualizeAlgorithm(1, row, col, algo);
         break;
       }
       default:
@@ -138,7 +158,7 @@ export default class App extends React.Component {
           const node = nodesInShortestPathOrder[i];
           document.getElementById(`node-${node.row}-${node.col}`).className =
             "node node-shortest-path";
-        }, 50 * i);
+        }, 20 * i);
       }
     } else {
       for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
@@ -149,7 +169,7 @@ export default class App extends React.Component {
     }
   };
 
-  animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder, type) => {
+  animateAlgorithm = (visitedNodesInOrder, nodesInShortestPathOrder, type) => {
     if (type === 0) {
       for (let i = 0; i <= visitedNodesInOrder.length; i++) {
         // use to color the final path, yellow in the end
@@ -179,17 +199,59 @@ export default class App extends React.Component {
     }
   };
 
-  visualizeDijkstra = (type, row, col) => {
-    if (type === 1) clear_all(this.state.grid);
+  handleAlgorithm = (row, col, algo_type) => {
     // creating a DEEP Copy, very important step
     // creating a shall copy, wud have made all changes to state during dijkstras itself
     const grid = JSON.parse(JSON.stringify(this.state.grid));
     const start_node = grid[START_NODE_ROW][START_NODE_COL];
     const end_node = grid[row][col];
-    // Using dijstrak's methods to get direst results
-    const visitedNodesInOrder = dijkstras(grid, start_node, end_node);
-    const nodesInShortestPathOrder = getNodesInShortestPathOrder(end_node);
-    this.animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder, type);
+    var visitedNodesInOrder = [];
+    var nodesInShortestPathOrder = [];
+
+    switch (algo_type) {
+      case constants.DIJK: {
+        visitedNodesInOrder = dijkstras(grid, start_node, end_node);
+        nodesInShortestPathOrder = getNodesInShortestPathOrder(end_node);
+        break;
+      }
+      case constants.DFS_NORM: {
+        visitedNodesInOrder = solve_dfs(grid, start_node, end_node, 1);
+        nodesInShortestPathOrder = getNodesInShortestPathOrderDFS();
+        break;
+      }
+      case constants.DFS_RAND: {
+        visitedNodesInOrder = solve_dfs(grid, start_node, end_node, 0);
+        nodesInShortestPathOrder = getNodesInShortestPathOrderDFS();
+        break;
+      }
+      case constants.BFS: {
+        visitedNodesInOrder = solve_bfs(grid, start_node, end_node);
+        nodesInShortestPathOrder = getNodesInShortestPathOrderBFS(end_node);
+        break;
+      }
+      case constants.MBFS: {
+        visitedNodesInOrder = solve_mbfs(grid, start_node, end_node);
+        nodesInShortestPathOrder = getNodesInShortestPathOrderMBFS();
+        break;
+      }
+      case constants.ASTAR: {
+        visitedNodesInOrder = solve_astar(grid, start_node, end_node);
+        nodesInShortestPathOrder = getNodesInShortestPathOrderASTAR(end_node);
+        break;
+      }
+      default:
+        break;
+    }
+    return [visitedNodesInOrder, nodesInShortestPathOrder];
+  };
+
+  visualizeAlgorithm = (type, row, col, algo_type) => {
+    algo = algo_type;
+    if (type === 1) clear_all(this.state.grid);
+    const ret = this.handleAlgorithm(row, col, algo);
+    const visitedNodesInOrder = ret[0];
+    const nodesInShortestPathOrder = ret[1];
+    this.animateAlgorithm(visitedNodesInOrder, nodesInShortestPathOrder, type);
     if (this.state.buttonPressed !== constants.DONE)
       this.setState({ buttonPressed: constants.DONE });
   };
@@ -275,7 +337,9 @@ export default class App extends React.Component {
           addEnd={this.handleChoice}
           addWall={this.handleChoice}
           delWall={this.handleChoice}
-          visualizeDijkstras={this.visualizeDijkstra}
+          visualizeAlgorithm={this.visualizeAlgorithm}
+          start_node_row={START_NODE_ROW}
+          start_node_col={START_NODE_COL}
           end_node_row={END_NODE_ROW}
           end_node_col={END_NODE_COL}
         />
@@ -340,6 +404,7 @@ const createNode = (row, col) => {
     isVisited: false,
     isWall: false,
     previousNode: null,
+    src: 0,
   };
 };
 
