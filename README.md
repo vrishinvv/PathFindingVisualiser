@@ -14,7 +14,11 @@ For those, who want to see it in action, here is a quick link: https://peaceful-
 ### Maze Finding Algorihms:
 * Recursive Division
 * Recursive Backtracking
+* Random Maze
 
+### Features:
+* Real time solution update, upon click and drag of end node
+* One can add a middle node, to force solution to reach end node only ater visiting the mid node
 
 
 ### DrawBacks:
