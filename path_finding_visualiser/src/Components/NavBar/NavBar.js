@@ -29,6 +29,7 @@ export default class Node extends React.Component {
     const {
       visualizeMaze1,
       visualizeMaze2,
+      visualizeMaze3,
       clearBoard,
       addMid,
       delMid,
@@ -61,6 +62,12 @@ export default class Node extends React.Component {
                 >
                   Recursive Backtracking
                 </NavDropdown.Item>
+                <NavDropdown.Item
+                  href="#action/3.22"
+                  onClick={() => visualizeMaze3()}
+                >
+                  Random Walls
+                </NavDropdown.Item>
               </NavDropdown>
               <NavDropdown title="Node Actions" id="collasible-nav-dropdown">
                 <NavDropdown.Item
@@ -70,7 +77,7 @@ export default class Node extends React.Component {
                   Add Mid
                 </NavDropdown.Item>
                 <NavDropdown.Item
-                  href="#action/3.11"
+                  href="#action/3.12"
                   onClick={() => delMid(constants.DEL_MID)}
                 >
                   Delete Mid

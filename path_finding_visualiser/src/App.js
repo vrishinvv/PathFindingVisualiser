@@ -22,6 +22,7 @@ import {
 } from "./Algorithm/ASearch";
 
 import { getNodesInOrder } from "./MazeBuilder/RecursiveDivision";
+import { solve_rm } from "./MazeBuilder/RandomMaze";
 import NavBar from "./Components/NavBar/NavBar";
 import { solve } from "./MazeBuilder/RecursiveBacktracker";
 import * as constants from "./Constants";
@@ -506,6 +507,38 @@ export default class App extends React.Component {
     }
   };
 
+  visualizeMaze1 = () => {
+    this.clearBoard();
+    const grid = JSON.parse(JSON.stringify(this.state.grid));
+    const visitedNodesInOrder = getNodesInOrder(grid, 0, N - 1, 0, M - 1);
+    for (let i = 0; i < visitedNodesInOrder.length; i++) {
+      const node = visitedNodesInOrder[i];
+      const a_node = this.state.grid[node.row][node.col];
+      if (a_node.isStart || a_node.isMid || a_node.isEnd) continue;
+      setTimeout(() => {
+        a_node.isWall = true;
+        document.getElementById(`node-${node.row}-${node.col}`).className =
+          "node node_wall_add";
+      }, 10 * i);
+    }
+  };
+
+  visualizeMaze3 = () => {
+    this.clearBoard();
+    const grid = JSON.parse(JSON.stringify(this.state.grid));
+    const visitedNodesInOrder = solve_rm(grid, 0, N - 1, 0, M - 1);
+    for (let i = 0; i < visitedNodesInOrder.length; i++) {
+      const node = visitedNodesInOrder[i];
+      const a_node = this.state.grid[node.row][node.col];
+      if (a_node.isStart || a_node.isMid || a_node.isEnd) continue;
+      setTimeout(() => {
+        a_node.isWall = true;
+        document.getElementById(`node-${node.row}-${node.col}`).className =
+          "node node_wall_add";
+      }, 10 * i);
+    }
+  };
+
   componentDidMount() {
     const g = initialiseGrid();
     this.setState({ grid: g });
@@ -599,6 +632,7 @@ export default class App extends React.Component {
         <NavBar
           visualizeMaze1={this.visualizeMaze1}
           visualizeMaze2={this.visualizeMaze2}
+          visualizeMaze3={this.visualizeMaze3}
           clearBoard={this.clearBoard}
           addStart={this.handleChoice}
           addMid={this.add_mid_node}
