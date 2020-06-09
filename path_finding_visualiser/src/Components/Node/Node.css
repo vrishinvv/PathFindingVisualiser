@@ -43,7 +43,7 @@
 
 .node_vis {
   animation-name: visitedAnimation;
-  animation-duration: 0.5s;
+  animation-duration: 1.5s;
   animation-timing-function: ease-out;
   animation-delay: 0;
   animation-direction: alternate;
@@ -53,7 +53,7 @@
 }
 .node_vis_2 {
   animation-name: visitedAnimation2;
-  animation-duration: 0.5s;
+  animation-duration: 1.5s;
   animation-timing-function: ease-out;
   animation-delay: 0;
   animation-direction: alternate;
@@ -127,22 +127,22 @@
 @keyframes visitedAnimation2 {
   0% {
     transform: scale(0.3);
-    background-color: rgba(17, 0, 92, 0.75);
+    background-color: rgba(110, 0, 37, 0.75);
     border-radius: 100%;
   }
 
   50% {
-    background-color: rgba(17, 104, 217, 0.75);
+    background-color: rgba(255, 0, 119, 0.75);
   }
 
   75% {
     transform: scale(1.2);
-    background-color: rgba(98, 0, 255, 0.75);
+    background-color: rgba(243, 82, 170, 0.75);
   }
 
   100% {
     transform: scale(1);
-    background-color: rgba(163, 5, 255, 0.75);
+    background-color: rgba(199, 118, 247, 0.75);
   }
 }
 
@@ -254,7 +254,7 @@
 }
 .node-shortest-path {
   animation-name: shortestPath;
-  animation-duration: 0.5s;
+  animation-duration: 1.5s;
   animation-timing-function: ease-out;
   animation-delay: 0;
   animation-direction: alternate;
@@ -266,7 +266,7 @@
 
 .node-shortest-path-2 {
   animation-name: shortestPath2;
-  animation-duration: 0.5s;
+  animation-duration: 1.5s;
   animation-timing-function: ease-out;
   animation-delay: 0;
   animation-direction: alternate;

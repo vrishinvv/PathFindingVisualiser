@@ -61,10 +61,6 @@ export default class Node extends React.Component {
                 >
                   Recursive Backtracking
                 </NavDropdown.Item>
-                <NavDropdown.Divider />
-                <NavDropdown.Item href="#action/3.4">
-                  Separated link
-                </NavDropdown.Item>
               </NavDropdown>
               <NavDropdown title="Node Actions" id="collasible-nav-dropdown">
                 <NavDropdown.Item
@@ -192,9 +188,6 @@ export default class Node extends React.Component {
                   </Form>
                 </NavDropdown.Item>
               </NavDropdown>
-              <Nav.Link eventKey={2} href="#memes">
-                Dank memes
-              </Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Navbar>
