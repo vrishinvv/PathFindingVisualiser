@@ -2,20 +2,36 @@ import React from "react";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
 import NavDropdown from "react-bootstrap/NavDropdown";
+import Form from "react-bootstrap/Form";
 import * as constants from "../../Constants";
+var preserved = [];
 export default class Node extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
   }
 
+  handleStatus = (a) => {
+    if (preserved.includes(a)) {
+      preserved = preserved.filter((num) => {
+        return num !== a;
+      });
+    } else {
+      preserved.push(a);
+    }
+    this.props.handlePreserveChange(preserved);
+  };
+
+  /* componentDidMount() {
+    document.getElementById("checkbox-1").checked = true;
+  } */
   render() {
     const {
       visualizeMaze1,
       visualizeMaze2,
       clearBoard,
-      addStart,
-      addEnd,
+      addMid,
+      delMid,
       addWall,
       delWall,
       visualizeAlgorithm,
@@ -52,16 +68,16 @@ export default class Node extends React.Component {
               </NavDropdown>
               <NavDropdown title="Node Actions" id="collasible-nav-dropdown">
                 <NavDropdown.Item
-                  href="#action/3.3"
-                  onClick={() => addStart(constants.START)}
+                  href="#action/3.11"
+                  onClick={() => addMid(constants.ADD_MID)}
                 >
-                  Add Start
+                  Add Mid
                 </NavDropdown.Item>
                 <NavDropdown.Item
-                  href="#action/3.4"
-                  onClick={() => addEnd(constants.END)}
+                  href="#action/3.11"
+                  onClick={() => delMid(constants.DEL_MID)}
                 >
-                  Add End
+                  Delete Mid
                 </NavDropdown.Item>
                 <NavDropdown.Item
                   href="#action/3.5"
@@ -160,7 +176,22 @@ export default class Node extends React.Component {
             </Nav>
 
             <Nav>
-              <Nav.Link href="#deets">More deets</Nav.Link>
+              <NavDropdown title="Preserve" id="collasible-nav-dropdown">
+                <NavDropdown.Item href="#action/5.4">
+                  <Form>
+                    <div key={`checkbox`} className="mb-3">
+                      <Form.Check
+                        label="Walls"
+                        type="checkbox"
+                        id="checkbox-2"
+                        onClick={() =>
+                          this.handleStatus(constants.PRESERVE_WALLS)
+                        }
+                      />
+                    </div>
+                  </Form>
+                </NavDropdown.Item>
+              </NavDropdown>
               <Nav.Link eventKey={2} href="#memes">
                 Dank memes
               </Nav.Link>

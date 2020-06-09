@@ -10,6 +10,7 @@
     "materialize-css": "^1.0.0-rc.2",
     "react": "^16.13.1",
     "react-bootstrap": "^1.0.1",
+    "react-bootstrap-multiselect": "^2.4.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1"
   },

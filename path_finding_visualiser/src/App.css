@@ -1,4 +1,6 @@
 .grid {
   margin: 100px 0 0;
   font-size: 0;
+  width: 100vw;
+  height: 100vh;
 }

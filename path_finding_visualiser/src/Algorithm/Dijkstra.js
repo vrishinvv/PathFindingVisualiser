@@ -15,6 +15,7 @@ export function dijkstras(grid, start_node, end_node) {
     // We must be trapped and should therefore stop.
     if (closestNode.distance === 1000000000) return visitedNodesInOrder;
     visitedNodesInOrder.push(closestNode);
+
     if (closestNode === end_node) return visitedNodesInOrder;
 
     updateNeighbors(closestNode, grid);
