@@ -147,7 +147,7 @@ export default class App extends React.Component {
   visualizeMaze = (maze_type) => {
     this.clearBoard();
     const visitedNodesInOrder = this.handleMaze(maze_type);
-    animateMaze(this.state_grid, visitedNodesInOrder, maze_type);
+    animateMaze(this.state.grid, visitedNodesInOrder, maze_type);
   };
 
   clearBoard = () => {
