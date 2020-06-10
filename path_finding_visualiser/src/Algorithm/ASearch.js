@@ -34,6 +34,14 @@ function get_euclid_distance(x1, y1, x2, y2) {
   v2 = v2 * v2;
   return Math.pow(v1 + v2, 0.5);
 }
+
+/* this is our sor function, the place where A* differs from dijkstra's
+ Here we sort based on a function f=g+h, where,
+ g - distance with which we reach the neighbor node
+ h - the heurestic/ prediction/ possible amount of moves to reach target
+ this heurestic can be say euclidean distance, or manhattan distance etc
+*/
+
 function sortNodesByDistance(unvisitedNodes) {
   unvisitedNodes.sort((nodeA, nodeB) => {
     return (

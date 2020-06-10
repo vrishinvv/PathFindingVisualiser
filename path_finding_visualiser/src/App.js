@@ -1,44 +1,23 @@
 import React from "react";
 import "./App.css";
-import Node from "./Components/Node/Node";
-import { dijkstras, getNodesInShortestPathOrder } from "./Algorithm/Dijkstra";
-import {
-  solve_dfs,
-  getNodesInShortestPathOrderDFS,
-} from "./Algorithm/DepthFirstSearch";
-import {
-  solve_bfs,
-  getNodesInShortestPathOrderBFS,
-} from "./Algorithm/BreadthFirstSearch";
-
-import {
-  solve_mbfs,
-  getNodesInShortestPathOrderMBFS,
-} from "./Algorithm/MultiSourceBFS";
-
-import {
-  solve_astar,
-  getNodesInShortestPathOrderASTAR,
-} from "./Algorithm/ASearch";
-
-import { getNodesInOrder } from "./MazeBuilder/RecursiveDivision";
-import { solve_rm } from "./MazeBuilder/RandomMaze";
-import NavBar from "./Components/NavBar/NavBar";
-import { solve } from "./MazeBuilder/RecursiveBacktracker";
 import * as constants from "./Constants";
+import NavBar from "./Components/NavBar/NavBar";
+import Node from "./Components/Node/Node";
+import { solve_algorithm } from "./Algorithm/RootCaller";
+import { solve_maze } from "./MazeBuilder/RootCaller";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-let START_NODE_ROW = 5;
-let START_NODE_COL = 10;
-let END_NODE_ROW = 5;
-let END_NODE_COL = 20;
+let START_NODE_ROW = 12;
+let START_NODE_COL = 30;
+let END_NODE_ROW = 12;
+let END_NODE_COL = 40;
 let MID_NODE_ROW = -1;
 let MID_NODE_COL = -1;
 const N = 27;
 const M = 75;
 let cur_row = -1;
 let cur_col = -1;
-let algo;
+let algo = "";
 var Preserved = [];
 var buttonPressed = constants.NONE;
 
@@ -51,11 +30,43 @@ export default class App extends React.Component {
     };
   }
 
+  do_mouse_work = (state_grid, row, col) => {
+    switch (buttonPressed) {
+      case constants.ADD_WALL: {
+        add_wall_to_grid(state_grid, row, col);
+        break;
+      }
+      case constants.DEL_WALL: {
+        del_wall_from_grid(state_grid, row, col);
+        break;
+      }
+      case constants.DONE: {
+        if (state_grid[row][col].isWall) return;
+        this.visualizeAlgorithm(1, row, col, algo);
+        break;
+      }
+
+      case constants.START: {
+        change_start_node(state_grid, row, col);
+        break;
+      }
+      case constants.END: {
+        change_end_node(state_grid, row, col);
+        break;
+      }
+      case constants.MID: {
+        change_mid_node(state_grid, row, col);
+        break;
+      }
+      default:
+        break;
+    }
+  };
+
   handleMouseDown = (row, col) => {
     if (row === cur_row && col === cur_col) return;
-    //if (this.state.mouseIsPressed === false)
     this.setState({ mouseIsPressed: true });
-    console.log("before: ", buttonPressed, this.state.mouseIsPressed);
+
     if (buttonPressed !== constants.DONE) {
       if (this.state.grid[row][col].isStart) {
         buttonPressed = constants.START;
@@ -70,46 +81,7 @@ export default class App extends React.Component {
       }
     }
 
-    console.log("after: ", buttonPressed, this.state.mouseIsPressed);
-    switch (buttonPressed) {
-      case constants.ADD_WALL: {
-        add_wall_to_grid(this.state.grid, row, col);
-        break;
-      }
-      case constants.DEL_WALL: {
-        del_wall_from_grid(this.state.grid, row, col);
-        break;
-      }
-      case constants.DONE: {
-        if (this.state.grid[row][col].isWall) return;
-        this.visualizeAlgorithm(1, row, col, algo);
-        break;
-      }
-
-      case constants.START: {
-        change_start_node(this.state.grid, row, col);
-        break;
-      }
-      case constants.END: {
-        change_end_node(this.state.grid, row, col);
-        break;
-      }
-      case constants.MID: {
-        change_mid_node(this.state.grid, row, col);
-        break;
-      }
-      case constants.ADD_MID: {
-        this.add_mid_node(this.state.grid, row, col);
-        break;
-      }
-      case constants.DEL_MID: {
-        this.del_mid_node(this.state.grid, row, col);
-        break;
-      }
-      default:
-        break;
-    }
-
+    this.do_mouse_work(this.state.grid, row, col);
     cur_row = row;
     cur_col = col;
   };
@@ -118,43 +90,8 @@ export default class App extends React.Component {
     if (row === cur_row && col === cur_col) return;
     if (!this.state.mouseIsPressed) return;
 
-    switch (buttonPressed) {
-      case constants.ADD_WALL: {
-        add_wall_to_grid(this.state.grid, row, col);
-        break;
-      }
-      case constants.DEL_WALL: {
-        del_wall_from_grid(this.state.grid, row, col);
-        break;
-      }
-      case constants.DONE: {
-        if (this.state.grid[row][col].isWall) return;
-        this.visualizeAlgorithm(1, row, col, algo);
-        break;
-      }
-      case constants.START: {
-        change_start_node(this.state.grid, row, col);
-        break;
-      }
-      case constants.END: {
-        change_end_node(this.state.grid, row, col);
-        break;
-      }
-      case constants.MID: {
-        change_mid_node(this.state.grid, row, col);
-        break;
-      }
-      case constants.ADD_MID: {
-        this.add_mid_node(this.state.grid, row, col);
-        break;
-      }
-      case constants.DEL_MID: {
-        this.del_mid_node(this.state.grid, row, col);
-        break;
-      }
-      default:
-        break;
-    }
+    this.do_mouse_work(this.state.grid, row, col);
+
     cur_row = row;
     cur_col = col;
   };
@@ -166,290 +103,25 @@ export default class App extends React.Component {
   handleChoice = (ch) => {
     if (buttonPressed === ch) buttonPressed = constants.NONE;
     else buttonPressed = ch;
+    if (buttonPressed === constants.ADD_MID) add_mid_node(this.state.grid);
+    else if (buttonPressed === constants.DEL_MID) del_mid_node(this.state.grid);
   };
 
   handlePreserveChange = (preserved_data) => {
     Preserved = preserved_data;
   };
 
-  animateShortestPath = (nodesInShortestPathOrder, type) => {
-    let m = 100000000;
-    for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
-      const node = nodesInShortestPathOrder[i];
-      if (i === 1) continue;
-      if (
-        MID_NODE_ROW !== -1 &&
-        node.row === MID_NODE_ROW &&
-        node.col === MID_NODE_COL
-      ) {
-        m = i;
-        break;
-      }
-    }
-    if (type === 0) {
-      for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
-        setTimeout(() => {
-          const node = nodesInShortestPathOrder[i];
-          const orig_node = this.state.grid[node.row][node.col];
-          orig_node.isShortest = orig_node.isVisited = true;
-
-          let value = "";
-          if (i >= m) {
-            value = "node-shortest-path-2";
-          } else {
-            value = "node-shortest-path";
-          }
-          document.getElementById(
-            `node-${node.row}-${node.col}`
-          ).className = `node ${value}`;
-        }, 20 * i);
-      }
-    } else {
-      for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
-        const node = nodesInShortestPathOrder[i];
-        const orig_node = this.state.grid[node.row][node.col];
-        orig_node.isShortest = orig_node.isVisited = true;
-        document.getElementById(`node-${node.row}-${node.col}`).className =
-          "node node-shortest-path_f";
-      }
-    }
-  };
-
-  animateAlgorithm = (visitedNodesInOrder, nodesInShortestPathOrder, type) => {
-    let m = 10000000;
-    for (let i = 0; i < visitedNodesInOrder.length; i++) {
-      const node = visitedNodesInOrder[i];
-      if (i === 1) continue;
-      if (
-        MID_NODE_ROW !== -1 &&
-        node.row === MID_NODE_ROW &&
-        node.col === MID_NODE_COL
-      ) {
-        m = i;
-        break;
-      }
-    }
-    if (type === 0) {
-      for (let i = 0; i <= visitedNodesInOrder.length; i++) {
-        // use to color the final path, yellow in the end
-        if (i === visitedNodesInOrder.length) {
-          setTimeout(() => {
-            this.animateShortestPath(nodesInShortestPathOrder, type);
-          }, 10 * i);
-          return;
-        }
-
-        //yellow blinker to indicate current position
-        setTimeout(() => {
-          document.getElementById(`node-${node.row}-${node.col}`).className =
-            "node node_current";
-        }, 10 * i - 15);
-        setTimeout(() => {
-          document.getElementById(`node-${node.row}-${node.col}`).className =
-            "node";
-        }, 10 * i - 5);
-
-        const node = visitedNodesInOrder[i];
-        let value = "";
-        if (i >= m) {
-          value = "node_vis_2";
-        } else {
-          value = "node_vis";
-        }
-
-        //used to color the visited grids in order
-        setTimeout(() => {
-          const orig_node = this.state.grid[node.row][node.col];
-          orig_node.isVisited = true;
-          if (node.isStart === true) orig_node.isStart = true;
-          document.getElementById(
-            `node-${node.row}-${node.col}`
-          ).className = `node ${value}`;
-        }, 10 * i);
-      }
-    } else {
-      for (let i = 0; i <= visitedNodesInOrder.length; i++) {
-        if (i === visitedNodesInOrder.length) {
-          this.animateShortestPath(nodesInShortestPathOrder, type);
-          return;
-        }
-
-        const node = visitedNodesInOrder[i];
-        const orig_node = this.state.grid[node.row][node.col];
-        let value = "";
-        if (i >= m) {
-          value = "node_vis_f_2";
-          orig_node.isVisited2 = true;
-        } else {
-          value = "node_vis_f";
-          orig_node.isVisited = true;
-        }
-        document.getElementById(
-          `node-${node.row}-${node.col}`
-        ).className = `node ${value}`;
-      }
-    }
-  };
-
-  handleAlgorithm = (row, col, algo_type) => {
-    // creating a DEEP Copy, very important step
-    // creating a shall copy, wud have made all changes to state during dijkstras itself
-    var grid = JSON.parse(JSON.stringify(this.state.grid));
-    var start_node = grid[START_NODE_ROW][START_NODE_COL];
-    var end_node = grid[row][col];
-    var visitedNodesInOrder = [];
-    var visitedNodesInOrder2 = [];
-    var nodesInShortestPathOrder = [];
-    var nodesInShortestPathOrder2 = [];
-    var mid_node = createNode();
-    mid_node.row = MID_NODE_ROW;
-    mid_node.row = MID_NODE_COL;
-
-    switch (algo_type) {
-      case constants.DIJK: {
-        if (MID_NODE_ROW === -1) {
-          visitedNodesInOrder = dijkstras(grid, start_node, end_node);
-          nodesInShortestPathOrder = getNodesInShortestPathOrder(end_node);
-        } else {
-          mid_node = grid[MID_NODE_ROW][MID_NODE_COL];
-          visitedNodesInOrder = dijkstras(grid, start_node, mid_node);
-          nodesInShortestPathOrder = getNodesInShortestPathOrder(mid_node);
-          grid = JSON.parse(JSON.stringify(this.state.grid));
-          mid_node = grid[MID_NODE_ROW][MID_NODE_COL];
-          end_node = grid[row][col];
-          visitedNodesInOrder2 = dijkstras(grid, mid_node, end_node);
-          nodesInShortestPathOrder2 = getNodesInShortestPathOrder(end_node);
-
-          for (let i in visitedNodesInOrder2) {
-            visitedNodesInOrder.push(visitedNodesInOrder2[i]);
-          }
-          for (let i in nodesInShortestPathOrder2) {
-            nodesInShortestPathOrder.push(nodesInShortestPathOrder2[i]);
-          }
-        }
-        break;
-      }
-      case constants.DFS_NORM: {
-        if (MID_NODE_ROW === -1) {
-          visitedNodesInOrder = solve_dfs(grid, start_node, end_node, 1);
-          nodesInShortestPathOrder = getNodesInShortestPathOrderDFS();
-        } else {
-          mid_node = grid[MID_NODE_ROW][MID_NODE_COL];
-          visitedNodesInOrder = solve_dfs(grid, start_node, mid_node, 1);
-          nodesInShortestPathOrder = getNodesInShortestPathOrderDFS(mid_node);
-          grid = JSON.parse(JSON.stringify(this.state.grid));
-          mid_node = grid[MID_NODE_ROW][MID_NODE_COL];
-          end_node = grid[row][col];
-          visitedNodesInOrder2 = solve_dfs(grid, mid_node, end_node, 1);
-          nodesInShortestPathOrder2 = getNodesInShortestPathOrderDFS(end_node);
-
-          for (let i in visitedNodesInOrder2) {
-            visitedNodesInOrder.push(visitedNodesInOrder2[i]);
-          }
-          for (let i in nodesInShortestPathOrder2) {
-            nodesInShortestPathOrder.push(nodesInShortestPathOrder2[i]);
-          }
-        }
-        break;
-      }
-      case constants.DFS_RAND: {
-        if (MID_NODE_ROW === -1) {
-          visitedNodesInOrder = solve_dfs(grid, start_node, end_node, 0);
-          nodesInShortestPathOrder = getNodesInShortestPathOrderDFS();
-        } else {
-          mid_node = grid[MID_NODE_ROW][MID_NODE_COL];
-          visitedNodesInOrder = solve_dfs(grid, start_node, mid_node, 0);
-          nodesInShortestPathOrder = getNodesInShortestPathOrderDFS(mid_node);
-          grid = JSON.parse(JSON.stringify(this.state.grid));
-          mid_node = grid[MID_NODE_ROW][MID_NODE_COL];
-          end_node = grid[row][col];
-          visitedNodesInOrder2 = solve_dfs(grid, mid_node, end_node, 0);
-          nodesInShortestPathOrder2 = getNodesInShortestPathOrderDFS(end_node);
-
-          for (let i in visitedNodesInOrder2) {
-            visitedNodesInOrder.push(visitedNodesInOrder2[i]);
-          }
-          for (let i in nodesInShortestPathOrder2) {
-            nodesInShortestPathOrder.push(nodesInShortestPathOrder2[i]);
-          }
-        }
-        break;
-      }
-      case constants.BFS: {
-        if (MID_NODE_ROW === -1) {
-          visitedNodesInOrder = solve_bfs(grid, start_node, end_node);
-          nodesInShortestPathOrder = getNodesInShortestPathOrderBFS(end_node);
-        } else {
-          mid_node = grid[MID_NODE_ROW][MID_NODE_COL];
-          visitedNodesInOrder = solve_bfs(grid, start_node, mid_node);
-          nodesInShortestPathOrder = getNodesInShortestPathOrderBFS(mid_node);
-          grid = JSON.parse(JSON.stringify(this.state.grid));
-          mid_node = grid[MID_NODE_ROW][MID_NODE_COL];
-          end_node = grid[row][col];
-          visitedNodesInOrder2 = solve_bfs(grid, mid_node, end_node);
-          nodesInShortestPathOrder2 = getNodesInShortestPathOrderBFS(end_node);
-
-          for (let i in visitedNodesInOrder2) {
-            visitedNodesInOrder.push(visitedNodesInOrder2[i]);
-          }
-          for (let i in nodesInShortestPathOrder2) {
-            nodesInShortestPathOrder.push(nodesInShortestPathOrder2[i]);
-          }
-        }
-        break;
-      }
-      case constants.MBFS: {
-        if (MID_NODE_ROW === -1) {
-          visitedNodesInOrder = solve_mbfs(grid, start_node, end_node);
-          nodesInShortestPathOrder = getNodesInShortestPathOrderMBFS();
-        } else {
-          mid_node = grid[MID_NODE_ROW][MID_NODE_COL];
-          visitedNodesInOrder = solve_mbfs(grid, start_node, mid_node);
-          nodesInShortestPathOrder = getNodesInShortestPathOrderMBFS(mid_node);
-          grid = JSON.parse(JSON.stringify(this.state.grid));
-          mid_node = grid[MID_NODE_ROW][MID_NODE_COL];
-          end_node = grid[row][col];
-          visitedNodesInOrder2 = solve_mbfs(grid, mid_node, end_node);
-          nodesInShortestPathOrder2 = getNodesInShortestPathOrderMBFS(end_node);
-
-          for (let i in visitedNodesInOrder2) {
-            visitedNodesInOrder.push(visitedNodesInOrder2[i]);
-          }
-          for (let i in nodesInShortestPathOrder2) {
-            nodesInShortestPathOrder.push(nodesInShortestPathOrder2[i]);
-          }
-        }
-        break;
-      }
-      case constants.ASTAR: {
-        if (MID_NODE_ROW === -1) {
-          visitedNodesInOrder = solve_astar(grid, start_node, end_node);
-          nodesInShortestPathOrder = getNodesInShortestPathOrderASTAR(end_node);
-        } else {
-          mid_node = grid[MID_NODE_ROW][MID_NODE_COL];
-          visitedNodesInOrder = solve_astar(grid, start_node, mid_node);
-          nodesInShortestPathOrder = getNodesInShortestPathOrderASTAR(mid_node);
-          grid = JSON.parse(JSON.stringify(this.state.grid));
-          mid_node = grid[MID_NODE_ROW][MID_NODE_COL];
-          end_node = grid[row][col];
-          visitedNodesInOrder2 = solve_astar(grid, mid_node, end_node);
-          nodesInShortestPathOrder2 = getNodesInShortestPathOrderASTAR(
-            end_node
-          );
-
-          for (let i in visitedNodesInOrder2) {
-            visitedNodesInOrder.push(visitedNodesInOrder2[i]);
-          }
-          for (let i in nodesInShortestPathOrder2) {
-            nodesInShortestPathOrder.push(nodesInShortestPathOrder2[i]);
-          }
-        }
-        break;
-      }
-      default:
-        break;
-    }
-    return [visitedNodesInOrder, nodesInShortestPathOrder];
+  handleAlgorithm = (end_row, end_col, algo_type) => {
+    return solve_algorithm(
+      this.state.grid,
+      START_NODE_ROW,
+      START_NODE_COL,
+      end_row,
+      end_col,
+      MID_NODE_ROW,
+      MID_NODE_COL,
+      algo_type
+    );
   };
 
   visualizeAlgorithm = (type, row, col, algo_type) => {
@@ -459,119 +131,32 @@ export default class App extends React.Component {
     const ret = this.handleAlgorithm(row, col, algo);
     const visitedNodesInOrder = ret[0];
     const nodesInShortestPathOrder = ret[1];
-    this.animateAlgorithm(visitedNodesInOrder, nodesInShortestPathOrder, type);
+    animateAlgorithm(
+      this.state.grid,
+      visitedNodesInOrder,
+      nodesInShortestPathOrder,
+      type
+    );
     if (buttonPressed !== constants.DONE) buttonPressed = constants.DONE;
   };
 
-  visualizeMaze1 = () => {
+  handleMaze = (maze_type) => {
+    return solve_maze(this.state.grid, N, M, maze_type);
+  };
+
+  visualizeMaze = (maze_type) => {
     this.clearBoard();
-    const grid = JSON.parse(JSON.stringify(this.state.grid));
-    const visitedNodesInOrder = getNodesInOrder(grid, 0, N - 1, 0, M - 1);
-    for (let i = 0; i < visitedNodesInOrder.length; i++) {
-      const node = visitedNodesInOrder[i];
-      const a_node = this.state.grid[node.row][node.col];
-      if (a_node.isStart || a_node.isMid || a_node.isEnd) continue;
-      setTimeout(() => {
-        a_node.isWall = true;
-        document.getElementById(`node-${node.row}-${node.col}`).className =
-          "node node_wall_add";
-      }, 10 * i);
-    }
-  };
-
-  visualizeMaze2 = () => {
-    this.clearBoard();
-    const grid = JSON.parse(JSON.stringify(this.state.grid));
-    const visitedNodesInOrder = solve(grid, 0, N - 1, 0, M - 1);
-    for (let i = 0; i < N; i++) {
-      for (let j = 0; j < M; j++) {
-        const node = this.state.grid[i][j];
-        if (node.isStart || node.isMid || node.isEnd) continue;
-        setTimeout(() => {
-          node.isWall = true;
-          document.getElementById(`node-${i}-${j}`).className =
-            "node node_wall_f";
-        }, 10);
-      }
-    }
-
-    for (let i = 0; i < visitedNodesInOrder.length; i++) {
-      const node = visitedNodesInOrder[i];
-      const a_node = this.state.grid[node.row][node.col];
-      if (a_node.isStart || a_node.isMid || a_node.isEnd) continue;
-      setTimeout(() => {
-        a_node.isWall = false;
-        document.getElementById(`node-${node.row}-${node.col}`).className =
-          "node node_wall_del";
-      }, 20 * i);
-    }
-  };
-
-  visualizeMaze1 = () => {
-    this.clearBoard();
-    const grid = JSON.parse(JSON.stringify(this.state.grid));
-    const visitedNodesInOrder = getNodesInOrder(grid, 0, N - 1, 0, M - 1);
-    for (let i = 0; i < visitedNodesInOrder.length; i++) {
-      const node = visitedNodesInOrder[i];
-      const a_node = this.state.grid[node.row][node.col];
-      if (a_node.isStart || a_node.isMid || a_node.isEnd) continue;
-      setTimeout(() => {
-        a_node.isWall = true;
-        document.getElementById(`node-${node.row}-${node.col}`).className =
-          "node node_wall_add";
-      }, 10 * i);
-    }
-  };
-
-  visualizeMaze3 = () => {
-    this.clearBoard();
-    const grid = JSON.parse(JSON.stringify(this.state.grid));
-    const visitedNodesInOrder = solve_rm(grid, 0, N - 1, 0, M - 1);
-    for (let i = 0; i < visitedNodesInOrder.length; i++) {
-      const node = visitedNodesInOrder[i];
-      const a_node = this.state.grid[node.row][node.col];
-      if (a_node.isStart || a_node.isMid || a_node.isEnd) continue;
-      setTimeout(() => {
-        a_node.isWall = true;
-        document.getElementById(`node-${node.row}-${node.col}`).className =
-          "node node_wall_add";
-      }, 10 * i);
-    }
-  };
-
-  componentDidMount() {
-    const g = initialiseGrid();
-    this.setState({ grid: g });
-  }
-
-  add_mid_node = () => {
-    const grid = this.state.grid;
-    MID_NODE_ROW = 10;
-    MID_NODE_COL = 30;
-    console.log("here");
-    const node = grid[MID_NODE_ROW][MID_NODE_COL];
-    node.isMid = true;
-    node.isWall = false;
-    document.getElementById(`node-${MID_NODE_ROW}-${MID_NODE_COL}`).className =
-      "node node_mid";
-  };
-
-  del_mid_node = () => {
-    const grid = this.state.grid;
-    const node = grid[MID_NODE_ROW][MID_NODE_COL];
-    node.isMid = false;
-    document.getElementById(`node-${MID_NODE_ROW}-${MID_NODE_COL}`).className =
-      "node";
-    MID_NODE_ROW = MID_NODE_COL = -1;
+    const visitedNodesInOrder = this.handleMaze(maze_type);
+    animateMaze(this.state_grid, visitedNodesInOrder, maze_type);
   };
 
   clearBoard = () => {
-    const g = this.state.grid.slice();
+    const g = this.state.grid;
 
-    START_NODE_ROW = 5;
-    START_NODE_COL = 10;
-    END_NODE_ROW = 5;
-    END_NODE_COL = 20;
+    START_NODE_ROW = 12;
+    START_NODE_COL = 30;
+    END_NODE_ROW = 12;
+    END_NODE_COL = 40;
     MID_NODE_ROW = MID_NODE_COL = cur_row = cur_col = -1;
 
     buttonPressed = constants.NONE;
@@ -582,23 +167,6 @@ export default class App extends React.Component {
 
         if (Preserved.includes(constants.PRESERVE_WALLS)) {
           if (node.isWall === true) continue;
-        }
-        if (Preserved.includes(constants.PRESERVE_START)) {
-          if (node.isStart === true) {
-            document.getElementById(`node-${i}-${j}`).className =
-              "node node_start";
-            continue;
-          }
-        }
-        if (Preserved.includes(constants.PRESERVE_END)) {
-          if (node.isEnd === true) {
-            document.getElementById(`node-${i}-${j}`).className =
-              "node node_end";
-            continue;
-          }
-        }
-        if (Preserved.includes(constants.PRESERVE_VIS)) {
-          if (node.isVisited === true) continue;
         }
         document.getElementById(`node-${i}-${j}`).className = "node";
         node.row = i;
@@ -625,27 +193,22 @@ export default class App extends React.Component {
     this.setState({ grid: g });
   };
 
+  componentDidMount() {
+    const g = initialiseGrid();
+    this.setState({ grid: g });
+  }
+
   render() {
     const { grid, mouseIsPressed, buttonPressed } = this.state;
     return (
       <div>
         <NavBar
-          visualizeMaze1={this.visualizeMaze1}
-          visualizeMaze2={this.visualizeMaze2}
-          visualizeMaze3={this.visualizeMaze3}
           clearBoard={this.clearBoard}
-          addStart={this.handleChoice}
-          addMid={this.add_mid_node}
-          delMid={this.del_mid_node}
-          addEnd={this.handleChoice}
-          addWall={this.handleChoice}
-          delWall={this.handleChoice}
+          handleChoice={this.handleChoice}
           visualizeAlgorithm={this.visualizeAlgorithm}
-          start_node_row={START_NODE_ROW}
-          start_node_col={START_NODE_COL}
+          visualizeMaze={this.visualizeMaze}
           end_node_row={END_NODE_ROW}
           end_node_col={END_NODE_COL}
-          handlePreserveChange={this.handlePreserveChange}
         />
 
         <div className="grid">
@@ -784,6 +347,25 @@ const change_mid_node = (grid, row, col) => {
   MID_NODE_COL = col;
 };
 
+const add_mid_node = (grid) => {
+  MID_NODE_ROW = 10;
+  MID_NODE_COL = 30;
+  console.log("here");
+  const node = grid[MID_NODE_ROW][MID_NODE_COL];
+  node.isMid = true;
+  node.isWall = false;
+  document.getElementById(`node-${MID_NODE_ROW}-${MID_NODE_COL}`).className =
+    "node node_mid";
+};
+
+const del_mid_node = (grid) => {
+  const node = grid[MID_NODE_ROW][MID_NODE_COL];
+  node.isMid = false;
+  document.getElementById(`node-${MID_NODE_ROW}-${MID_NODE_COL}`).className =
+    "node";
+  MID_NODE_ROW = MID_NODE_COL = -1;
+};
+
 const clear_all = (grid) => {
   cur_row = cur_col = -1;
   for (let i = 0; i < N; i++) {
@@ -832,6 +414,171 @@ const clear_clever = (g) => {
       document.getElementById(
         `node-${MID_NODE_ROW}-${MID_NODE_COL}`
       ).className = "node node_mid";
+    }
+  }
+};
+
+const animateShortestPath = (state_grid, nodesInShortestPathOrder, type) => {
+  //this variable is used to check in which index mid node occurs, so that we can change colors
+  let m = 100000000;
+  for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
+    const node = nodesInShortestPathOrder[i];
+    if (i === 1) continue;
+    if (
+      MID_NODE_ROW !== -1 &&
+      node.row === MID_NODE_ROW &&
+      node.col === MID_NODE_COL
+    ) {
+      m = i;
+      break;
+    }
+  }
+
+  //animator code begins here
+  if (type === 0) {
+    for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
+      setTimeout(() => {
+        const node = nodesInShortestPathOrder[i];
+        const orig_node = state_grid[node.row][node.col];
+        orig_node.isShortest = orig_node.isVisited = true;
+
+        let value = "";
+        if (i >= m) {
+          value = "node-shortest-path-2";
+        } else {
+          value = "node-shortest-path";
+        }
+        document.getElementById(
+          `node-${node.row}-${node.col}`
+        ).className = `node ${value}`;
+      }, 20 * i);
+    }
+  } else {
+    for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
+      const node = nodesInShortestPathOrder[i];
+      const orig_node = state_grid[node.row][node.col];
+      orig_node.isShortest = orig_node.isVisited = true;
+      document.getElementById(`node-${node.row}-${node.col}`).className =
+        "node node-shortest-path_f";
+    }
+  }
+};
+
+const animateAlgorithm = (
+  state_grid,
+  visitedNodesInOrder,
+  nodesInShortestPathOrder,
+  type
+) => {
+  //this variable is used to check in which index mid node occurs, so that we can change colors
+  let m = 10000000;
+  for (let i = 0; i < visitedNodesInOrder.length; i++) {
+    const node = visitedNodesInOrder[i];
+    if (i === 1) continue;
+    if (
+      MID_NODE_ROW !== -1 &&
+      node.row === MID_NODE_ROW &&
+      node.col === MID_NODE_COL
+    ) {
+      m = i;
+      break;
+    }
+  }
+
+  //animator code begins here
+  if (type === 0) {
+    for (let i = 0; i <= visitedNodesInOrder.length; i++) {
+      // use to color the final path, yellow in the end
+      if (i === visitedNodesInOrder.length) {
+        setTimeout(() => {
+          animateShortestPath(state_grid, nodesInShortestPathOrder, type);
+        }, 10 * i);
+        return;
+      }
+
+      //yellow blinker to indicate current position
+      const node = visitedNodesInOrder[i];
+      setTimeout(() => {
+        document.getElementById(`node-${node.row}-${node.col}`).className =
+          "node node_current";
+      }, 10 * i - 15);
+      setTimeout(() => {
+        document.getElementById(`node-${node.row}-${node.col}`).className =
+          "node";
+      }, 10 * i - 5);
+
+      //condition to check if I have to change color
+      let value = "";
+      if (i >= m) {
+        value = "node_vis_2";
+      } else {
+        value = "node_vis";
+      }
+
+      //used to color the visited grids in order
+      setTimeout(() => {
+        const orig_node = state_grid[node.row][node.col];
+        orig_node.isVisited = true;
+        if (node.isStart === true) orig_node.isStart = true;
+        document.getElementById(
+          `node-${node.row}-${node.col}`
+        ).className = `node ${value}`;
+      }, 10 * i);
+    }
+  } else {
+    for (let i = 0; i <= visitedNodesInOrder.length; i++) {
+      if (i === visitedNodesInOrder.length) {
+        animateShortestPath(state_grid, nodesInShortestPathOrder, type);
+        return;
+      }
+
+      const node = visitedNodesInOrder[i];
+      const orig_node = state_grid[node.row][node.col];
+      let value = "";
+      if (i >= m) {
+        value = "node_vis_f_2";
+        orig_node.isVisited2 = true;
+      } else {
+        value = "node_vis_f";
+        orig_node.isVisited = true;
+      }
+      document.getElementById(
+        `node-${node.row}-${node.col}`
+      ).className = `node ${value}`;
+    }
+  }
+};
+
+const animateMaze = (state_grid, visitedNodesInOrder, maze_type) => {
+  if (maze_type === constants.MAZE_RB) {
+    for (let i = 0; i < N; i++) {
+      for (let j = 0; j < M; j++) {
+        const node = state_grid[i][j];
+        if (node.isStart || node.isMid || node.isEnd) continue;
+        setTimeout(() => {
+          node.isWall = true;
+          document.getElementById(`node-${i}-${j}`).className =
+            "node node_wall_f";
+        }, 10);
+      }
+    }
+  }
+  for (let i = 0; i < visitedNodesInOrder.length; i++) {
+    const node = visitedNodesInOrder[i];
+    const a_node = state_grid[node.row][node.col];
+    if (a_node.isStart || a_node.isMid || a_node.isEnd) continue;
+    if (maze_type !== constants.MAZE_RB) {
+      setTimeout(() => {
+        a_node.isWall = true;
+        document.getElementById(`node-${node.row}-${node.col}`).className =
+          "node node_wall_add";
+      }, 10 * i);
+    } else {
+      setTimeout(() => {
+        a_node.isWall = false;
+        document.getElementById(`node-${node.row}-${node.col}`).className =
+          "node node_wall_del";
+      }, 20 * i);
     }
   }
 };

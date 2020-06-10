@@ -27,15 +27,10 @@ export default class Node extends React.Component {
   } */
   render() {
     const {
-      visualizeMaze1,
-      visualizeMaze2,
-      visualizeMaze3,
       clearBoard,
-      addMid,
-      delMid,
-      addWall,
-      delWall,
+      handleChoice,
       visualizeAlgorithm,
+      visualizeMaze,
       end_node_row,
       end_node_col,
     } = this.props;
@@ -52,19 +47,19 @@ export default class Node extends React.Component {
               <NavDropdown title="Maze Algorithms" id="collasible-nav-dropdown">
                 <NavDropdown.Item
                   href="#action/3.1"
-                  onClick={() => visualizeMaze1()}
+                  onClick={() => visualizeMaze(constants.MAZE_RD)}
                 >
                   Recursive Division
                 </NavDropdown.Item>
                 <NavDropdown.Item
                   href="#action/3.2"
-                  onClick={() => visualizeMaze2()}
+                  onClick={() => visualizeMaze(constants.MAZE_RB)}
                 >
                   Recursive Backtracking
                 </NavDropdown.Item>
                 <NavDropdown.Item
                   href="#action/3.22"
-                  onClick={() => visualizeMaze3()}
+                  onClick={() => visualizeMaze(constants.MAZE_RAND)}
                 >
                   Random Walls
                 </NavDropdown.Item>
@@ -72,25 +67,25 @@ export default class Node extends React.Component {
               <NavDropdown title="Node Actions" id="collasible-nav-dropdown">
                 <NavDropdown.Item
                   href="#action/3.11"
-                  onClick={() => addMid(constants.ADD_MID)}
+                  onClick={() => handleChoice(constants.ADD_MID)}
                 >
                   Add Mid
                 </NavDropdown.Item>
                 <NavDropdown.Item
                   href="#action/3.12"
-                  onClick={() => delMid(constants.DEL_MID)}
+                  onClick={() => handleChoice(constants.DEL_MID)}
                 >
                   Delete Mid
                 </NavDropdown.Item>
                 <NavDropdown.Item
                   href="#action/3.5"
-                  onClick={() => addWall(constants.ADD_WALL)}
+                  onClick={() => handleChoice(constants.ADD_WALL)}
                 >
                   Add Wall
                 </NavDropdown.Item>
                 <NavDropdown.Item
                   href="#action/3.6"
-                  onClick={() => delWall(constants.DEL_WALL)}
+                  onClick={() => handleChoice(constants.DEL_WALL)}
                 >
                   Delete Wall
                 </NavDropdown.Item>

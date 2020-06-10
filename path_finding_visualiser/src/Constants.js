@@ -16,6 +16,10 @@ export const BFS = 103;
 export const MBFS = 104;
 export const ASTAR = 105;
 
+export const MAZE_RB = 300;
+export const MAZE_RD = 301;
+export const MAZE_RAND = 302;
+
 export const PRESERVE_WALLS = 201;
 export const PRESERVE_START = 202;
 export const PRESERVE_END = 203;

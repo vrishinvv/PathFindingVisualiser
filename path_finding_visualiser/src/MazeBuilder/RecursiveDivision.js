@@ -83,7 +83,13 @@ function add_to_ans(
   }
 }
 
-export function getNodesInOrder(grid, start_row, end_row, start_col, end_col) {
+export function solve_recursive_division(
+  grid,
+  start_row,
+  end_row,
+  start_col,
+  end_col
+) {
   visitedNodesInOrder = [];
   for (let i = start_col; i <= end_col; i++) {
     grid[start_row][i].isWall = grid[end_row][i].isWall = true;

@@ -32,8 +32,17 @@ function getUnvisitedNeighbors(node, grid) {
   return neighbors.filter((node) => !node.isVisited);
 }
 
-export function solve(grid) {
+export function solve_recursive_backtracker(grid) {
   visitedNodesInOrder = [];
   recursiveBacktracker(grid, 1, 1);
   return visitedNodesInOrder;
 }
+
+/*
+logic
+  1. start with a grid full of walls
+  2. start with any node, say 1, 1
+  3. look at its possible neighbors, that have not been visited yet.
+    by neighbors we mean, those nodes at a distance of 2 from the current node
+  4. randomly choose one neighbor, repeat steps 1-3 for this new node, until all nodes are visited
+*/
