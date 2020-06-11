@@ -6,8 +6,12 @@
 }
 
 .node_start {
-  animation-name: startAnimation;
-  animation-duration: 0.1s;
+  background-image: url(start_node.svg);
+  animation-name: specialNodes;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  animation-duration: 0.3s;
   animation-timing-function: ease-out;
   animation-delay: 0;
   animation-direction: alternate;
@@ -17,7 +21,11 @@
 }
 
 .node_end {
-  animation-name: endAnimation;
+  background-image: url(end_node.svg);
+  animation-name: specialNodes;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
   animation-duration: 0.1s;
   animation-timing-function: ease-out;
   animation-delay: 0;
@@ -28,7 +36,11 @@
 }
 
 .node_mid {
-  animation-name: midAnimation;
+  background-image: url(mid_node.svg);
+  animation-name: specialNodes;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
   animation-duration: 0.1s;
   animation-timing-function: ease-out;
   animation-delay: 0;
@@ -66,7 +78,7 @@
   background-color: rgba(0, 190, 218, 0.75);
 }
 .node_vis_f_2 {
-  background-color: rgba(163, 5, 255, 0.75);
+  background-color: rgba(199, 118, 247, 0.75);
 }
 
 .node-shortest-path_f {
@@ -317,5 +329,22 @@
   100% {
     transform: scale(1);
     background-color: rgb(255, 254, 106);
+  }
+}
+
+@keyframes specialNodes {
+  0% {
+    transform: scale(0.3);
+    /*background-color: darkslategrey;*/
+  }
+
+  50% {
+    transform: scale(1.2);
+    /*background-color: darkslategrey;*/
+  }
+
+  100% {
+    transform: scale(1);
+    /*background-color: darkslategrey;*/
   }
 }

@@ -24,7 +24,11 @@ export default class Node extends React.Component {
     } = this.props;
 
     let extra = "";
-    if (isWall) extra = "node_wall_add";
+
+    if (isShortest && isStart) extra = "node_start node-shortest-path-2";
+    else if (isShortest && isMid) extra = "node_mid node-shortest-path-2";
+    else if (isShortest && isEnd) extra = "node_end node-shortest-path-2";
+    else if (isWall) extra = "node_wall_add";
     else if (isStart) extra = "node_start";
     else if (isEnd) extra = "node_end";
     else if (isShortest) extra = "node-shortest-path_f";

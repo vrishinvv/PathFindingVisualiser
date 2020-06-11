@@ -20,6 +20,7 @@ let cur_col = -1;
 let algo = "";
 var Preserved = [];
 var buttonPressed = constants.NONE;
+var workIsDone = false;
 
 export default class App extends React.Component {
   constructor(props) {
@@ -31,6 +32,7 @@ export default class App extends React.Component {
   }
 
   do_mouse_work = (state_grid, row, col) => {
+    console.log(buttonPressed);
     switch (buttonPressed) {
       case constants.ADD_WALL: {
         add_wall_to_grid(state_grid, row, col);
@@ -40,13 +42,9 @@ export default class App extends React.Component {
         del_wall_from_grid(state_grid, row, col);
         break;
       }
-      case constants.DONE: {
-        if (state_grid[row][col].isWall) return;
-        this.visualizeAlgorithm(1, row, col, algo);
-        break;
-      }
 
       case constants.START: {
+        console.log("ehere as well");
         change_start_node(state_grid, row, col);
         break;
       }
@@ -61,33 +59,39 @@ export default class App extends React.Component {
       default:
         break;
     }
+
+    if (workIsDone === true) {
+      console.log("me");
+      //if (this.state.grid[row][col].isWall) return;
+      this.visualizeAlgorithm(1, row, col, algo);
+    }
   };
 
   handleMouseDown = (row, col) => {
-    if (row === cur_row && col === cur_col) return;
+    //if (row === cur_row && col === cur_col) return;
+
     this.setState({ mouseIsPressed: true });
 
-    if (buttonPressed !== constants.DONE) {
-      if (this.state.grid[row][col].isStart) {
-        buttonPressed = constants.START;
-      } else if (this.state.grid[row][col].isEnd) {
-        buttonPressed = constants.END;
-      } else if (this.state.grid[row][col].isMid) {
-        buttonPressed = constants.MID;
-      } else if (this.state.grid[row][col].isWall) {
-        buttonPressed = constants.DEL_WALL;
-      } else {
-        buttonPressed = constants.ADD_WALL;
-      }
+    if (this.state.grid[row][col].isStart) {
+      buttonPressed = constants.START;
+    } else if (this.state.grid[row][col].isEnd) {
+      buttonPressed = constants.END;
+    } else if (this.state.grid[row][col].isMid) {
+      buttonPressed = constants.MID;
+    } else if (this.state.grid[row][col].isWall) {
+      buttonPressed = constants.DEL_WALL;
+    } else {
+      buttonPressed = constants.ADD_WALL;
     }
-
+    console.log(buttonPressed);
     this.do_mouse_work(this.state.grid, row, col);
+
     cur_row = row;
     cur_col = col;
   };
 
   handleMouseEnter = (row, col) => {
-    if (row === cur_row && col === cur_col) return;
+    //if (row === cur_row && col === cur_col) return;
     if (!this.state.mouseIsPressed) return;
 
     this.do_mouse_work(this.state.grid, row, col);
@@ -116,8 +120,8 @@ export default class App extends React.Component {
       this.state.grid,
       START_NODE_ROW,
       START_NODE_COL,
-      end_row,
-      end_col,
+      END_NODE_ROW,
+      END_NODE_COL,
       MID_NODE_ROW,
       MID_NODE_COL,
       algo_type
@@ -125,6 +129,7 @@ export default class App extends React.Component {
   };
 
   visualizeAlgorithm = (type, row, col, algo_type) => {
+    workIsDone = true;
     algo = algo_type;
     if (type === 1) clear_all(this.state.grid);
     else clear_clever(this.state.grid);
@@ -137,7 +142,7 @@ export default class App extends React.Component {
       nodesInShortestPathOrder,
       type
     );
-    if (buttonPressed !== constants.DONE) buttonPressed = constants.DONE;
+    //if (buttonPressed !== constants.DONE) buttonPressed = constants.DONE;
   };
 
   handleMaze = (maze_type) => {
@@ -160,6 +165,7 @@ export default class App extends React.Component {
     MID_NODE_ROW = MID_NODE_COL = cur_row = cur_col = -1;
 
     buttonPressed = constants.NONE;
+    workIsDone = false;
     this.setState({ mouseIsPressed: false });
     for (let i = 0; i < N; i++) {
       for (let j = 0; j < M; j++) {
@@ -315,7 +321,12 @@ const change_start_node = (grid, row, col) => {
   document.getElementById(
     `node-${START_NODE_ROW}-${START_NODE_COL}`
   ).className = "node";
-  document.getElementById(`node-${row}-${col}`).className = "node node_start";
+  if (workIsDone === false) {
+    document.getElementById(`node-${row}-${col}`).className = "node node_start";
+  } else {
+    document.getElementById(`node-${row}-${col}`).className =
+      "node node_start node-shortest-path-2";
+  }
   node.isStart = true;
   START_NODE_ROW = row;
   START_NODE_COL = col;
@@ -448,6 +459,13 @@ const animateShortestPath = (state_grid, nodesInShortestPathOrder, type) => {
         } else {
           value = "node-shortest-path";
         }
+        if (node.isStart) {
+          value += " node_start";
+        } else if (node.isMid) {
+          value += " node_mid";
+        } else if (node.isEnd) {
+          value += " node_end";
+        }
         document.getElementById(
           `node-${node.row}-${node.col}`
         ).className = `node ${value}`;
@@ -458,8 +476,19 @@ const animateShortestPath = (state_grid, nodesInShortestPathOrder, type) => {
       const node = nodesInShortestPathOrder[i];
       const orig_node = state_grid[node.row][node.col];
       orig_node.isShortest = orig_node.isVisited = true;
-      document.getElementById(`node-${node.row}-${node.col}`).className =
-        "node node-shortest-path_f";
+      if (node.isStart) {
+        document.getElementById(`node-${node.row}-${node.col}`).className =
+          "node node_start node-shortest-path_f";
+      } else if (node.isMid) {
+        document.getElementById(`node-${node.row}-${node.col}`).className =
+          "node node_mid node-shortest-path_f";
+      } else if (node.isEnd) {
+        document.getElementById(`node-${node.row}-${node.col}`).className =
+          "node node_end node-shortest-path_f";
+      } else {
+        document.getElementById(`node-${node.row}-${node.col}`).className =
+          "node node-shortest-path_f";
+      }
     }
   }
 };
@@ -515,6 +544,14 @@ const animateAlgorithm = (
         value = "node_vis";
       }
 
+      if (node.isStart) {
+        value += " node_start";
+      } else if (node.isMid) {
+        value += " node_mid";
+      } else if (node.isEnd) {
+        value += " node_end";
+      }
+
       //used to color the visited grids in order
       setTimeout(() => {
         const orig_node = state_grid[node.row][node.col];
@@ -541,6 +578,14 @@ const animateAlgorithm = (
       } else {
         value = "node_vis_f";
         orig_node.isVisited = true;
+      }
+
+      if (node.isStart) {
+        value += " node_start";
+      } else if (node.isMid) {
+        value += " node_mid";
+      } else if (node.isEnd) {
+        value += " node_end";
       }
       document.getElementById(
         `node-${node.row}-${node.col}`
