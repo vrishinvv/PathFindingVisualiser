@@ -3,11 +3,11 @@ Ever felt like needing a utility that gives a visualisation of how a path findin
 For those, who want to see it in action, here is a quick link: https://peaceful-mesa-07537.herokuapp.com/
 
 ----------
-### Algoriithms built in;
+### Algoriithms built in:
 * Dijkstra's
 * Depth First Search - Randomised
 * Depth First Search - Normal
-* A* Seacrh
+* A* Search
 * Breadth First Search - Bidirectional
 * Breadth First Search - Normal
 
